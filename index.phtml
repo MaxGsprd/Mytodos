@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>To do</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>My to do<span class="title-colored">'s</span></h1>
+    <nav>
+    <?php if(array_key_exists('user',$_SESSION) == true ):  ?>
+      <div class='logged'>
+        <p>Vous êtes connecté en tant que : <span class=logged-name><?php echo $_SESSION['user']['userName'] ?></span></p>
+        <a href="logout.php">Déconnexion</a>
+      </div>
+    <?php else: ?>
+      <aside class="welcome-message">
+        <p><i class="fas fa-quote-left"></i> Du mal à vous organiser ? Avec My to do's vous pouvez créer et modifier vos listes de tâches en un clic ! N'oubliez plus rien !   <i class="fas fa-quote-right"></i></p>
+        <?php if(array_key_exists('userExist', $_SESSION) == true){
+          echo  '<div class="userExist">' . $_SESSION['userExist'] . '</div>';
+        } ?>
+        <?php if(array_key_exists('welcome', $_SESSION) == true){
+          echo  '<div class="welcomeUser">' . $_SESSION['welcome'] . '</div>';
+        } ?>
+      </aside>
+        <form class="login" action="login.php" method="post">
+          <fieldset>
+            <legend>Connexion / Inscription</legend>
+            <?php if(array_key_exists('error', $_SESSION) == true){
+                echo '<p class=log-error>Identifiant ou mot de passe invalide</p>';
+            } ?>
+            <p>
+              <label for="login"><i class="far fa-user"></i> Identifiant :</label>
+              <input class="hollow-input" type="text" name="login" placeholder="identifiant..." id="login" required>
+            </p>
+            <p>
+              <label for="pass"><i class="fas fa-lock"></i> Mot de passe :</label>
+              <input class="hollow-input" type="password" name="pass" placeholder="mot de passe..." id="pass">
+              <input type="submit" value="Connexion" id="login-button">
+            </p>
+            <p class="registerLink">pas encore inscrit ? <a href='#'>cliquez ici</a>
+            </p>
+          </fieldset>
+        </form>
+      <?php endif; ?>
+    </nav>
+    <section class="registerWindow">
+      <div class="register-inner">
+        <button class="close-register"><i class="fas fa-times"></i></button>
+        <h2>Inscription</h2>
+        <form action="register.php" method="post" id="registration">
+          <p>
+            <label for="userName"><i class="far fa-user"></i> Identifiant : <span class="feedback"></span></label>
+            <input class="hollow-input" type="text" name="userName" placeholder="choississez votre identifiant" id="userName" required>
+          <p>
+            <label for="password"><i class="fas fa-lock"></i> Mot de passe :</label>
+            <input class="hollow-input" type="password" name="password" placeholder="choississez votre mot de passe" id="password" required>
+          </p>
+          <p>
+            <input class="register-submit" type="submit" value="Je m'inscris" id="sub">
+          </p>
+        </form>
+      </div>
+    </section>
+  </header>
+  <main>
+    <section class="todoSection">
+      <h2>Que devez-vous faire ?</h2>
+      <?php if(array_key_exists('notConnected', $_SESSION) == true){
+          echo $_SESSION['notConnected'];
+      } ?>
+      <form class="todo" action="add.php" method="post">
+        <select class="select" name="chosen_time">
+          <option value="today">Aujourd'hui</option>
+          <option value="week">Cette semaine</option>
+          <option value="month">Ce mois-ci</option>
+          <option value="year">Cette année</option>
+        </select>
+        <p>
+          <label for="todo"><i class="fas fa-pencil-alt"></i> titre :</label>
+          <input class="hollow-input" type="text" name="name" id="todo" onfocus="this.placeholder=''"
+          placeholder ="ex: appeler le dentiste" required>
+        </p>
+        <p>
+          <label for="todo"><i class="fas fa-comment-alt"></i>  commentaire :</label>
+          <input class="hollow-input" type="text" name="comment" onfocus="this.placeholder=''"
+          placeholder ="ex: décaler mon rdv">
+        </p>
+        <p class="importance-check">
+          <input type="checkbox" id="important" name="important" value=1>
+          <label for="important" class="relevant">important</label>
+        </p>
+        <input type="hidden" name="ID" value="<?= intval($_GET['ID']) ?>">
+        <p class="send-todo">
+          <input class="send" type="submit" name="todoSubmit" value="Ajouter">
+        </p>
+      </form>
+    </section>
+    <section class="lists">
+      <article class="day">
+        <h2><?= $day ?></h2>
+        <ul>
+        <?php if(array_key_exists('user', $_SESSION) == true){ ?>
+          <?php foreach ($data as $value) { ?>
+            <?php if ($value['chosen_time'] == 'today') { ?>
+              <?php if (htmlspecialchars($value['comment'] == '')) { ?>
+                <li class="entries">
+              <? } else { ?>
+                <li class="entries" title="<?= htmlspecialchars($value['comment'])?>">
+              <?php } ?>
+              <?php if ($value['important'] == 1) { ?>
+                  <p id='important'><?= htmlspecialchars($value['name']) ?></p>
+                  <a href="delete.php?ID=<?= intval($value['ID']) ?>" class="bin-not-showing">Supprimer ? <i class="far fa-window-close"></i></a>
+                </li>
+              <?php } else { ?>
+                  <p><?= htmlspecialchars($value['name']) ?></p>
+                  <a href="delete.php?ID=<?= intval($value['ID']) ?>" class="bin-not-showing">Supprimer ? <i class="far fa-window-close"></i></a>
+                </li>
+              <?php } ?>
+            <?php } ?>
+          <?php } ?>
+        <?php } ?>
+        </ul>
+      </article>
+      <article class="week">
+        <h2>semaine n°<?= $week ?></h2>
+        <ul>
+        <?php if(array_key_exists('user', $_SESSION) == true){ ?>
+          <?php foreach ($data as $value) { ?>
+            <?php if ($value['chosen_time'] == 'week') { ?>
+              <?php if (htmlspecialchars($value['comment'] == '')) { ?>
+                <li class="entries">
+              <? } else { ?>
+                <li class="entries" title="<?= htmlspecialchars($value['comment'])?>">
+              <?php } ?>
+              <?php if ($value['important'] == 1) { ?>
+                    <p id='important'><?= htmlspecialchars($value['name']) ?></p>
+                    <a href="delete.php?ID=<?= intval($value['ID']) ?>" class="bin-not-showing">Supprimer ? <i class="far fa-window-close"></i></a>
+                </li>
+                <?php } else { ?>
+                    <p><?= htmlspecialchars($value['name']) ?></p>
+                    <a href="delete.php?ID=<?= intval($value['ID']) ?>" class="bin-not-showing">Supprimer ? <i class="far fa-window-close"></i></a>
+                </li>
+              <?php } ?>
+            <?php } ?>
+          <?php } ?>
+        <?php } ?>
+        </ul>
+      </article>
+      <article class="month">
+        <h2><?= $month ?></h2>
+        <ul>
+        <?php if(array_key_exists('user', $_SESSION) == true){ ?>
+          <?php foreach ($data as $value) { ?>
+            <?php if ($value['chosen_time'] == 'month') { ?>
+              <?php if (htmlspecialchars($value['comment']) == '') { ?>
+                <li class="entries">
+              <? } else { ?>
+                <li class="entries" title="<?= htmlspecialchars($value['comment'])?>">
+              <?php } ?>
+              <?php if ($value['important'] == 1) { ?>
+                  <p id='important'><?= htmlspecialchars($value['name']) ?></p>
+                  <a href="delete.php?ID=<?= intval($value['ID']) ?>" class="bin-not-showing">Supprimer ? <i class="far fa-window-close"></i></a>
+                </li>
+              <?php } else { ?>
+                  <p><?= htmlspecialchars($value['name']) ?></p>
+                  <a href="delete.php?ID=<?= intval($value['ID']) ?>" class="bin-not-showing">Supprimer ? <i class="far fa-window-close"></i></a>
+                </li>
+              <?php } ?>
+            <?php } ?>
+          <?php } ?>
+        <?php } ?>
+        </ul>
+      </article>
+      <article class="year">
+        <h2><?= $year ?></h2>
+        <ul>
+        <?php if(array_key_exists('user', $_SESSION) == true){ ?>
+          <?php foreach ($data as $value) { ?>
+            <?php if ($value['chosen_time'] == 'year') { ?>
+              <?php if (htmlspecialchars($value['comment'] == '')) { ?>
+                <li class="entries">
+              <? } else { ?>
+                <li class="entries" title="<?= htmlspecialchars($value['comment'])?>">
+              <?php } ?>
+              <?php if ($value['important'] == 1) { ?>
+                  <p id='important'><?= htmlspecialchars($value['name']) ?></p>
+                  <a href="delete.php?ID=<?= intval($value['ID']) ?>" class="bin-not-showing">Supprimer ? <i class="far fa-window-close"></i></a>
+                </li>
+              <?php } else { ?>
+                  <p><?= htmlspecialchars($value['name']) ?></p>
+                  <a href="delete.php?ID=<?= intval($value['ID']) ?>" class="bin-not-showing">Supprimer ? <i class="far fa-window-close"></i></a>
+                </li>
+              <?php } ?>
+            <?php } ?>
+          <?php } ?>
+        <?php } ?>
+        </ul>
+      </article>
+    </section>
+  </main>
+  <footer>
+    <p>Un site de : Max GASPARD - Me contacter :
+      <a href="https://www.linkedin.com/in/max-gaspard-40bb35183/"><i class="fab fa-linkedin"></i></a>
+      <a href="https://github.com/MaxGsprd"><i class="fab fa-github"></i></a>
+    </p>
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>
+<?php
+    unset($_SESSION["error"]);
+    unset($_SESSION["notConnected"]);
+    unset($_SESSION["userExist"]);
+    unset($_SESSION["welcome"]);
+?>
